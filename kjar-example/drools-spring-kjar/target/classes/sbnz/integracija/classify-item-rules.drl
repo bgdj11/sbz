@@ -1,0 +1,19 @@
+package sbnz.integracija;
+
+import demo.facts.Item;
+
+rule "Classify Item - Low Range"
+    when
+        $i: Item( cost <= 300, category == Category.NA )
+    then
+        $i.setCategory(Item.Category.LOW_RANGE);
+        update($i);
+end
+
+rule "Classify Item - High Range"
+    when
+        $i: Item( cost > 300, category == Category.NA )
+    then
+        $i.setCategory(Item.Category.HIGH_RANGE);
+        update($i);
+end
