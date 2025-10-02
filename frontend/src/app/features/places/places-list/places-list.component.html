@@ -1,0 +1,18 @@
+<h2>Mesta</h2>
+
+<div *ngFor="let pl of places()" class="card" style="margin: 10px 0; padding:10px;">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <div><b>{{pl.name}}</b> — {{pl.city}}, {{pl.country}}</div>
+      <div style="color:#6b778c;">{{pl.description}}</div>
+    </div>
+    <div>
+      <label>Oceni:
+        <select #s>
+          <option *ngFor="let x of [1,2,3,4,5]" [value]="x">{{x}}</option>
+        </select>
+      </label>
+      <button (click)="rateQuick(pl, s.value)">Pošalji</button>
+    </div>
+  </div>
+</div>

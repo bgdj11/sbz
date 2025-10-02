@@ -1,0 +1,21 @@
+<nav class="topnav">
+  <div class="brand">SBZ</div>
+  <a routerLink="/posts/friends" *ngIf="auth.isLoggedIn">Feed</a>
+  <a routerLink="/posts/me" *ngIf="auth.isLoggedIn">Moje objave</a>
+  <a routerLink="/places" *ngIf="auth.isLoggedIn">Mesta</a>
+  <a routerLink="/places/new" *ngIf="auth.isAdmin">+ Mesto</a>
+  <a routerLink="/users/search" *ngIf="auth.isLoggedIn">Pronađi prijatelje</a>
+  <span class="spacer"></span>
+  <ng-container *ngIf="!auth.isLoggedIn">
+    <a routerLink="/login">Login</a>
+    <a routerLink="/register">Registracija</a>
+  </ng-container>
+  <ng-container *ngIf="auth.isLoggedIn">
+    <a routerLink="/profile">Profil</a>
+    <a href (click)="$event.preventDefault(); onLogout()">Logout</a>
+  </ng-container>
+</nav>
+
+<main class="container">
+  <router-outlet></router-outlet>
+</main>

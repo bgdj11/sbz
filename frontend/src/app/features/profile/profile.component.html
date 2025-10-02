@@ -1,0 +1,7 @@
+<h2>Profil</h2>
+<div *ngIf="user() as u" class="card" style="max-width:520px;">
+  <p><b>{{u.firstName}} {{u.lastName}}</b></p>
+  <p>{{u.email}}</p>
+  <p *ngIf="u.city">Grad: {{u.city}}</p>
+  <p *ngIf="u.admin">Uloga: Admin</p>
+</div>

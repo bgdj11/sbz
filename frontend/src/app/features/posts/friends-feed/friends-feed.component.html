@@ -1,0 +1,69 @@
+<h2>Objave prijatelja</h2>
+
+<div class="card create-post-card">
+  <h3>Kreiraj novu objavu</h3>
+  <div class="form-group">
+    <label for="content">Sadržaj objave</label>
+    <textarea 
+      id="content"
+      [(ngModel)]="newContent" 
+      rows="4" 
+      placeholder="Napiši novu objavu..." 
+      class="form-control"
+    ></textarea>
+  </div>
+  
+
+
+  <app-hashtag-input
+    [(ngModel)]="newHashtags"
+    label="Hashtags (opciono)"
+    placeholder="Dodaj hashtags..."
+  ></app-hashtag-input>
+
+  <div class="form-actions">
+    <button (click)="create()" [disabled]="!newContent.trim()" class="btn btn-primary">
+      Objavi
+    </button>
+  </div>
+</div>
+
+<div class="posts-container" *ngIf="posts().length > 0">
+  <div *ngFor="let p of posts(); trackBy: trackByPostId" class="card post-card">
+    <article>
+      <header class="post-author">
+        <b>{{p.author.firstName}} {{p.author.lastName}}</b>
+      </header>
+      
+      <div class="post-content">
+        <p>{{p.content}}</p>
+      </div>
+      
+      <div class="post-meta" *ngIf="p.hashtags && p.hashtags.length > 0">
+        <div class="post-hashtags">
+          <span *ngFor="let tag of p.hashtags" class="hashtag">#{{tag}}</span>
+        </div>
+      </div>
+      
+      <div class="post-footer">
+        <small class="post-date">{{formatDate(p.createdAt)}}</small>
+        <div class="post-actions">
+          <button 
+            (click)="like(p)" 
+            [disabled]="p.liking"
+            [class.liked]="isLiked(p)"
+            class="btn btn-sm"
+          >
+            {{ isLiked(p) ? 'Unlike' : 'Like' }}
+          </button>
+          <span class="likes-count">👍 {{ likesCount(p) }}</span>
+          <button (click)="report(p)" class="btn btn-sm btn-warning">Prijavi</button>
+        </div>
+      </div>
+    </article>
+  </div>
+</div>
+
+<div *ngIf="posts().length === 0" class="no-posts">
+  <p>Nema objava od prijatelja. Dodaj prijatelje da vidiš njihove objave!</p>
+</div>

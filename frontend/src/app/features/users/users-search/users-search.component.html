@@ -1,0 +1,51 @@
+<div class="search-container">
+  <h2>Pronađi prijatelje</h2>
+  
+  <div class="search-section">
+    <div class="search-form">
+      <div class="search-input-group">
+        <input 
+          [(ngModel)]="q" 
+          (keyup.enter)="doSearch()" 
+          placeholder="Pretražite po imenu, prezimenu ili email adresi..." 
+          class="search-input"
+        />
+        <button (click)="doSearch()" class="btn btn-primary search-btn">
+          🔍 Pretraži
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="results().length === 0 && hasSearched" class="no-results">
+      <p>Nema rezultata pretrage. Pokušajte sa drugim terminima.</p>
+    </div>
+
+    <div *ngIf="results().length > 0" class="results-section">
+      <h3>Rezultati pretrage ({{results().length}})</h3>
+      
+      <div class="users-grid">
+        <div *ngFor="let u of results()" class="user-card">
+          <div class="user-info">
+            <div class="user-avatar">
+              {{ u.firstName.charAt(0) }}{{ u.lastName.charAt(0) }}
+            </div>
+            <div class="user-details">
+              <h4>{{ u.firstName }} {{ u.lastName }}</h4>
+              <p class="user-email">{{ u.email }}</p>
+              <p *ngIf="u.city" class="user-city">📍 {{ u.city }}</p>
+            </div>
+          </div>
+          
+          <div class="user-actions">
+            <button (click)="addFriend(u)" class="btn btn-success">
+              ➕ Dodaj prijatelja
+            </button>
+            <button (click)="block(u)" class="btn btn-warning">
+              🚫 Blokiraj
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
