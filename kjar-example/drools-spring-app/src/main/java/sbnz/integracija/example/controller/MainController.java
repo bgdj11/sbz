@@ -3,6 +3,10 @@ package sbnz.integracija.example.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sbnz.integracija.example.dto.DTOMapper;
+import sbnz.integracija.example.dto.PlaceDTO;
+import sbnz.integracija.example.dto.PostDTO;
+import sbnz.integracija.example.dto.UserDTO;
 import sbnz.integracija.example.entity.Place;
 import sbnz.integracija.example.entity.Post;
 import sbnz.integracija.example.entity.User;
@@ -43,9 +47,9 @@ public class MainController {
         List<Place> topPlaces = placeService.getPlacesSortedByRating();
 
         Map<String, Object> dashboardData = new HashMap<>();
-        dashboardData.put("currentUser", currentUser);
-        dashboardData.put("posts", allPosts);
-        dashboardData.put("places", topPlaces);
+        dashboardData.put("currentUser", DTOMapper.toUserDTO(currentUser));
+        dashboardData.put("posts", DTOMapper.toPostDTOList(allPosts));
+        dashboardData.put("places", DTOMapper.toPlaceDTOList(topPlaces));
         
         return ResponseEntity.ok(dashboardData);
     }
@@ -60,27 +64,32 @@ public class MainController {
         List<Post> userPosts = postService.getPostsByUser(currentUser);
         
         Map<String, Object> profileData = new HashMap<>();
-        profileData.put("currentUser", currentUser);
-        profileData.put("posts", userPosts);
+        profileData.put("currentUser", DTOMapper.toUserDTO(currentUser));
+        profileData.put("posts", DTOMapper.toPostDTOList(userPosts));
         
         return ResponseEntity.ok(profileData);
     }
 
     @PostMapping("/posts")
-    public ResponseEntity<?> createPost(@RequestBody Map<String, String> request, HttpSession session) {
+    public ResponseEntity<?> createPost(@RequestBody Map<String, Object> request, HttpSession session) {
         User currentUser = getCurrentUser(session);
         if (currentUser == null) {
             return ResponseEntity.status(401).body("User not authenticated");
         }
 
-        String content = request.get("content");
+        String content = (String) request.get("content");
         if (content == null || content.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Content cannot be empty");
         }
 
+        // Get hashtags from request
+        @SuppressWarnings("unchecked")
+        List<String> hashtags = (List<String>) request.get("hashtags");
+
         try {
-            Post post = postService.createPost(content, currentUser);
-            return ResponseEntity.ok(post);
+            Post post = postService.createPost(content, currentUser, hashtags);
+            PostDTO postDTO = DTOMapper.toPostDTO(post);
+            return ResponseEntity.ok(postDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to create post: " + e.getMessage());
         }
@@ -147,8 +156,8 @@ public class MainController {
 
         Map<String, Object> searchResults = new HashMap<>();
         searchResults.put("query", q);
-        searchResults.put("users", users);
-        searchResults.put("places", places);
+        searchResults.put("users", DTOMapper.toUserDTOList(users));
+        searchResults.put("places", DTOMapper.toPlaceDTOList(places));
 
         return ResponseEntity.ok(searchResults);
     }

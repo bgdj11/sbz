@@ -32,6 +32,19 @@ public class PostService {
         return postRepository.save(post);
     }
 
+    public Post createPost(String content, User author, List<String> hashtags) {
+        Post post = new Post(content, author);
+
+        if (hashtags != null && !hashtags.isEmpty()) {
+            post.setHashtags(hashtags);
+        } else {
+            List<String> extractedHashtags = extractHashtags(content);
+            post.setHashtags(extractedHashtags);
+        }
+        
+        return postRepository.save(post);
+    }
+
     public List<Post> getAllPosts() {
         return postRepository.findAllOrderByCreatedAtDesc();
     }

@@ -1,5 +1,6 @@
 package sbnz.integracija.example.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,6 +36,7 @@ public class Place {
     private List<String> hashtags = new ArrayList<>();
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Rating> ratings = new HashSet<>();
 
     public Place() {}
@@ -74,7 +76,6 @@ public class Place {
         return name + ", " + city + ", " + country;
     }
 
-    // Method to recalculate average rating
     public void updateAverageRating() {
         if (ratings.isEmpty()) {
             this.averageRating = 0.0;

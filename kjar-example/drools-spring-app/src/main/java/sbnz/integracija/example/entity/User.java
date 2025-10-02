@@ -1,5 +1,7 @@
 package sbnz.integracija.example.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +24,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     private String city;
@@ -30,9 +33,11 @@ public class User {
     private boolean isAdmin = false;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Post> posts = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Rating> ratings = new HashSet<>();
 
     @ManyToMany
@@ -41,6 +46,7 @@ public class User {
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
+    @JsonIgnoreProperties({"posts", "ratings", "friends", "blockedUsers", "password"})
     private Set<User> friends = new HashSet<>();
 
     @ManyToMany
@@ -49,6 +55,7 @@ public class User {
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "blocked_user_id")
     )
+    @JsonIgnoreProperties({"posts", "ratings", "friends", "blockedUsers", "password"})
     private Set<User> blockedUsers = new HashSet<>();
 
     public User() {}

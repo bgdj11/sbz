@@ -3,6 +3,8 @@ package sbnz.integracija.example.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sbnz.integracija.example.dto.DTOMapper;
+import sbnz.integracija.example.dto.UserDTO;
 import sbnz.integracija.example.entity.User;
 import sbnz.integracija.example.service.UserService;
 
@@ -48,7 +50,7 @@ public class AuthController {
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Login successful");
-            response.put("user", user);
+            response.put("user", DTOMapper.toUserDTO(user));
             
             return ResponseEntity.ok(response);
         } else {
@@ -74,7 +76,7 @@ public class AuthController {
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Registration successful! Please log in.");
-            response.put("user", user);
+            response.put("user", DTOMapper.toUserDTO(user));
             
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {

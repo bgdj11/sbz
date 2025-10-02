@@ -36,6 +36,19 @@ public class PlaceService {
         return placeRepository.save(place);
     }
 
+    public Place createPlace(String name, String country, String city, String description, List<String> hashtags) {
+        Place place = new Place(name, country, city, description);
+
+        if (hashtags != null && !hashtags.isEmpty()) {
+            place.setHashtags(hashtags);
+        } else {
+            List<String> extractedHashtags = extractHashtags(description);
+            place.setHashtags(extractedHashtags);
+        }
+        
+        return placeRepository.save(place);
+    }
+
     public List<Place> getAllPlaces() {
         return placeRepository.findAll();
     }
@@ -69,8 +82,7 @@ public class PlaceService {
         rating.setHashtags(hashtags);
         
         rating = ratingRepository.save(rating);
-        
-        // Update place's average rating
+
         place.updateAverageRating();
         placeRepository.save(place);
         

@@ -1,5 +1,7 @@
 package sbnz.integracija.example.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ public class Post {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
+    @JsonIgnoreProperties({"posts", "ratings", "friends", "blockedUsers", "password"})
     private User author;
 
     @ElementCollection
@@ -42,6 +45,7 @@ public class Post {
         joinColumns = @JoinColumn(name = "post_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @JsonIgnoreProperties({"posts", "ratings", "friends", "blockedUsers", "password"})
     private Set<User> likedByUsers = new HashSet<>();
 
     @ManyToMany
@@ -50,6 +54,7 @@ public class Post {
         joinColumns = @JoinColumn(name = "post_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @JsonIgnoreProperties({"posts", "ratings", "friends", "blockedUsers", "password"})
     private Set<User> reportedByUsers = new HashSet<>();
 
     public Post() {}
