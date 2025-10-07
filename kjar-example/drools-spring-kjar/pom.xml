@@ -17,13 +17,11 @@
   <packaging>kjar</packaging>
 
   <dependencies>
-    
     <dependency>
       <groupId>demo</groupId>
       <artifactId>facts</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
-
   </dependencies>
 
   <!-- ensures that artifact resources are validated and pre-compiled -->

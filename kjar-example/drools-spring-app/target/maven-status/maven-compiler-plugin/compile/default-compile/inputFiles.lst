@@ -12,11 +12,13 @@ D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\int
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\config\JacksonConfig.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\repository\UserRepository.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\dto\RatingDTO.java
+D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\service\FeedService.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\controller\MainController.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\service\UserService.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\service\PlaceService.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\repository\PlaceRepository.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\repository\RatingRepository.java
+D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\controller\FeedController.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\SampleAppService.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\config\GlobalExceptionHandler.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\drools-spring-app\src\main\java\sbnz\integracija\example\entity\Place.java

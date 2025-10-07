@@ -80,4 +80,24 @@ public class UserService {
     public List<User> getAllRegularUsers() {
         return userRepository.findAllRegularUsers();
     }
+
+    public List<String> getFriendIds(String userId) {
+        Optional<User> userOpt = userRepository.findById(Long.valueOf(userId));
+        if (userOpt.isPresent()) {
+            return userOpt.get().getFriends().stream()
+                .map(u -> u.getId().toString())
+                .collect(java.util.stream.Collectors.toList());
+        }
+        return java.util.Collections.emptyList();
+    }
+
+    public List<String> getBlockedIds(String userId) {
+        Optional<User> userOpt = userRepository.findById(Long.valueOf(userId));
+        if (userOpt.isPresent()) {
+            return userOpt.get().getBlockedUsers().stream()
+                .map(u -> u.getId().toString())
+                .collect(java.util.stream.Collectors.toList());
+        }
+        return java.util.Collections.emptyList();
+    }
 }

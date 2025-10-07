@@ -20,9 +20,12 @@ sbnz\integracija\example\controller\HomeController.class
 sbnz\integracija\example\config\SecurityConfig.class
 sbnz\integracija\example\dto\PlaceDTO.class
 sbnz\integracija\example\SampleApp.class
+sbnz\integracija\example\controller\FeedController$1.class
 sbnz\integracija\example\repository\PlaceRepository.class
+sbnz\integracija\example\service\FeedService.class
 sbnz\integracija\example\config\JacksonConfig.class
 sbnz\integracija\example\repository\PostRepository.class
 sbnz\integracija\example\config\DataLoader.class
+sbnz\integracija\example\controller\FeedController.class
 sbnz\integracija\example\controller\MainController.class
 sbnz\integracija\example\SampleHomeController.class

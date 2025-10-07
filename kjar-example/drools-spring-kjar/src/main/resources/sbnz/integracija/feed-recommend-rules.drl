@@ -1,0 +1,199 @@
+package rules;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+import demo.facts.RecommendedFeedRequest;
+import demo.facts.FriendIds;
+import demo.facts.CandidatePost;
+import demo.facts.PostFact;
+import demo.facts.PopularHashtag;
+import demo.facts.PopularPost;
+import demo.facts.UserFeedContext;
+import demo.facts.UserAuthoredCount;
+
+import demo.facts.SimilarUser;
+import demo.facts.PostLikers;
+import demo.facts.UserLikedPosts;
+
+global java.time.LocalDateTime NOW;
+global java.util.List recommendFeedOut;
+
+dialect "java"
+
+// --- marker-i za router ---
+declare UseBase end      // korisnik NIJE nov (ima prijatelje ILI svoje objave)
+declare UseNew  end      // korisnik JE nov (nema prijatelje I nema svoje objave)
+
+// ===== VALIDACIJE (opciono; samo log) =====
+rule "RecommendFeed: userId missing"
+    salience 100
+    agenda-group "feed-recommend-validate"
+when
+    $req : RecommendedFeedRequest()
+    eval($req.getUserId() == null || $req.getUserId().trim().isEmpty())
+then
+    System.out.println("RecommendFeed: userId missing");
+end
+
+// ===== ROUTER =====
+rule "REC Router -> BASE (has friends OR has authored)"
+    salience 50
+    agenda-group "feed-recommend-router"
+when
+    $req  : RecommendedFeedRequest()
+    $fids : FriendIds( $ids : ids )
+    $cnt  : UserAuthoredCount( $c : count )
+    eval( ($ids != null && !$ids.isEmpty()) || ($c > 0) )
+then
+    insert(new UseBase());
+end
+
+rule "REC Router -> NEW (no friends AND no authored)"
+    salience 40
+    agenda-group "feed-recommend-router"
+when
+    $req  : RecommendedFeedRequest()
+    $fids : FriendIds( $ids : ids )
+    $cnt  : UserAuthoredCount( $c : count )
+    eval( ($ids == null || $ids.isEmpty()) && ($c == 0) )
+then
+    insert(new UseNew());
+end
+
+// ===== GUARD (u oba toka) =====
+rule "REC guard: friend/self"
+    salience 200
+    agenda-group "feed-recommend-score"
+when
+    $req  : RecommendedFeedRequest( $uid : userId )
+    $fids : FriendIds( $ids : ids )
+    $c    : CandidatePost( $p : post )
+    eval( $p != null && ( Objects.equals($p.getAuthorId(), $uid)
+           || ($ids != null && $p.getAuthorId() != null && $ids.contains($p.getAuthorId())) ) )
+then
+    delete($c);
+end
+
+// ===== NEW (KORISNIK JE NOV): samo N1, N2 =====
+
+// N1: post je lajkovao sličan korisnik (Pearson >= 0.5)
+rule "NEW N1: liked by similar user"
+    agenda-group "feed-recommend-score"
+when
+    exists( UseNew() )
+    $req : RecommendedFeedRequest( $uid : userId )
+    $c   : CandidatePost( $p : post )
+    SimilarUser( baseUserId == $uid, $other : otherUserId, score >= 0.5 )
+    PostLikers( postId == $p.id, userIds contains $other )
+then
+    $c.addScore(1, "sličan korisnik lajkovao");
+end
+
+// helper: presek likera
+function double overlap(java.util.Set a, java.util.Set b){
+    if (a == null || b == null || a.isEmpty()) return 0d;
+    java.util.HashSet s = new java.util.HashSet(a);
+    s.retainAll(b);
+    return ((double) s.size()) / ((double) a.size());
+}
+
+// N2: post sličan postu koji je korisnik lajkovao (>=70% likera preseka)
+rule "NEW N2: similar to liked post"
+    agenda-group "feed-recommend-score"
+when
+    exists( UseNew() )
+    $req : RecommendedFeedRequest( $uid : userId )
+    $c   : CandidatePost( $p : post )
+    $plC : PostLikers( postId == $p.id,   $likersC : userIds )
+    $plL : PostLikers(                    $likersL : userIds )
+    UserLikedPosts( userId == $uid, $liked : postIds )
+    eval( $liked != null && $liked.contains($plL.getPostId()) )
+    eval( overlap($likersC, $likersL) >= 0.7 )
+then
+    $c.addScore(1, "slično lajkovanim objavama");
+end
+
+// ===== BASE (KORISNIK NIJE NOV) =====
+
+// R1: nov post (<24h)
+rule "BASE R1: recent (<24h)"
+    agenda-group "feed-recommend-score"
+when
+    exists( UseBase() )
+    $c : CandidatePost( $p : post )
+    eval( $p != null && $p.getCreatedAt() != null && $p.getCreatedAt().isAfter(NOW.minusHours(24)) )
+then
+    $c.addScore(1, "nov post (<24h)");
+end
+
+// R2: liked hashtag
+rule "BASE R2: liked hashtag"
+    agenda-group "feed-recommend-score"
+when
+    exists( UseBase() )
+    $uc : UserFeedContext( $liked : likedHashtags )
+    $c  : CandidatePost( $p : post )
+    exists( String( this memberOf $liked ) from $p.getHashtags() )
+then
+    $c.addScore(1, "lajkovani hešteg");
+end
+
+// R3: authored hashtag
+rule "BASE R3: authored hashtag"
+    agenda-group "feed-recommend-score"
+when
+    exists( UseBase() )
+    $uc : UserFeedContext( $auth : authoredHashtags )
+    $c  : CandidatePost( $p : post )
+    exists( String( this memberOf $auth ) from $p.getHashtags() )
+then
+    $c.addScore(1, "autorski hešteg");
+end
+
+// R4: popular post (24h + >10 lajkova) – pre-računato u PopularPost
+rule "BASE R4: popular post"
+    agenda-group "feed-recommend-score"
+when
+    exists( UseBase() )
+    $c : CandidatePost( $p : post )
+    PopularPost( postId == $p.id )
+then
+    $c.addScore(1, "popularan post");
+end
+
+// R5: popular hashtag (>5 objava u 24h) – pre-računato u PopularHashtag
+rule "BASE R5: popular hashtag"
+    agenda-group "feed-recommend-score"
+when
+    exists( UseBase() )
+    $c  : CandidatePost( $p : post )
+    $ph : PopularHashtag( $tag : tag )
+    String( this == $tag ) from $p.getHashtags()
+then
+    $c.addScore(1, "popularan hešteg");
+end
+
+// R6: boost – popularan hešteg i korisnik lajkuje taj hešteg
+rule "BASE R6: boost (popular & liked hashtag)"
+    agenda-group "feed-recommend-score"
+when
+    exists( UseBase() )
+    $uc : UserFeedContext( $liked : likedHashtags )
+    $c  : CandidatePost( $p : post )
+    $ph : PopularHashtag( $tag : tag )
+    String( this == $tag ) from $p.getHashtags()
+    eval( $liked != null && $liked.contains($tag) )
+then
+    $c.addScore(1, "boost: popularan & lajkovan hešteg");
+end
+
+// ===== OUTPUT =====
+rule "RecommendFeed: output candidates"
+    agenda-group "feed-recommend-output"
+when
+    $c : CandidatePost( $score : score )
+    eval( $score > 0 )
+then
+    recommendFeedOut.add($c);
+end
