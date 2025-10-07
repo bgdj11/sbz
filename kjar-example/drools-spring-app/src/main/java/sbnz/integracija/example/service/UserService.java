@@ -3,6 +3,7 @@ package sbnz.integracija.example.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sbnz.integracija.example.entity.User;
 import sbnz.integracija.example.repository.UserRepository;
 
@@ -57,11 +58,10 @@ public class UserService {
         return userRepository.searchUsers(searchTerm);
     }
 
+    @Transactional
     public void addFriend(User user, User friend) {
-        user.getFriends().add(friend);
-        friend.getFriends().add(user);
-        userRepository.save(user);
-        userRepository.save(friend);
+        // Use native query to avoid lazy loading the entire friends collection
+        userRepository.addFriendRelationship(user.getId(), friend.getId());
     }
 
     public void blockUser(User user, User userToBlock) {

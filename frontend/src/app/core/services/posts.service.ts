@@ -13,6 +13,12 @@ export interface CreatePostRequest {
   hashtags?: string[];
 }
 
+export interface RecommendedPost {
+  post: Post;
+  score: number;
+  reasons: string[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class PostsService {
   private http = inject(HttpClient);
@@ -24,6 +30,18 @@ export class PostsService {
 
   my(): Observable<Post[]> {
     return this.http.get<ProfileResp>(`${this.base}/profile`).pipe(map(r => r.posts ?? []));
+  }
+
+  getFriendsFeed(userId: string): Observable<Post[]> {
+    return this.http.get<Post[]>(`${this.base}/feed/friends`, {
+      params: { userId }
+    });
+  }
+
+  getRecommendedFeed(userId: string): Observable<RecommendedPost[]> {
+    return this.http.get<RecommendedPost[]>(`${this.base}/feed/recommend`, {
+      params: { userId }
+    });
   }
 
   create(request: CreatePostRequest): Observable<Post> {

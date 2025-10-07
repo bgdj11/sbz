@@ -1,9 +1,12 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PostsService, CreatePostRequest } from '../../../core/services/posts.service';
+import { PostsService, CreatePostRequest, RecommendedPost } from '../../../core/services/posts.service';
 import { Post } from '../../../core/models/post.model';
 import { HashtagInputComponent } from '../../../shared/hashtag-input/hashtag-input.component';
+import { AuthService } from '../../../core/services/auth.service';
+
+type FeedMode = 'friends' | 'recommended';
 
 @Component({
   standalone: true,
@@ -105,6 +108,10 @@ import { HashtagInputComponent } from '../../../shared/hashtag-input/hashtag-inp
       border-bottom: 1px solid #eee;
     }
 
+    .post-content {
+      margin: 12px 0;
+    }
+
     .post-content p {
       margin: 0 0 12px 0;
       line-height: 1.5;
@@ -172,12 +179,153 @@ import { HashtagInputComponent } from '../../../shared/hashtag-input/hashtag-inp
       padding: 40px 20px;
       color: #6c757d;
     }
+
+    .feed-mode-switcher {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #dee2e6;
+      padding-bottom: 0;
+    }
+
+    .mode-btn {
+      padding: 12px 24px;
+      border: none;
+      background: transparent;
+      color: #6c757d;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-btn:hover {
+      color: #007acc;
+      background: #f8f9fa;
+    }
+
+    .mode-btn.active {
+      color: #007acc;
+      border-bottom-color: #007acc;
+    }
+
+    .mode-btn i {
+      font-size: 18px;
+    }
+
+    .recommended-badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-high {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-medium {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .badge-low {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .post-score {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid;
+    }
+
+    .post-score.high-score {
+      border-left-color: #28a745;
+      background: #d4edda;
+    }
+
+    .post-score.medium-score {
+      border-left-color: #17a2b8;
+      background: #d1ecf1;
+    }
+
+    .post-score.low-score {
+      border-left-color: #ffc107;
+      background: #fff3cd;
+    }
+
+    .score-value {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .score-label {
+      font-size: 13px;
+      color: #6c757d;
+    }
+
+    .post-reasons {
+      margin: 12px 0;
+      padding: 10px;
+      background: #e7f3ff;
+      border-radius: 6px;
+      border-left: 3px solid #007acc;
+    }
+
+    .post-reasons h4 {
+      margin: 0 0 8px 0;
+      font-size: 13px;
+      color: #495057;
+      font-weight: 600;
+    }
+
+    .reasons-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .reasons-list li {
+      padding: 4px 0;
+      font-size: 13px;
+      color: #495057;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .reasons-list li:before {
+      content: "✓";
+      color: #007acc;
+      font-weight: bold;
+    }
   `]
 })
 export class FriendsFeedComponent implements OnInit {
   private postsSvc = inject(PostsService);
+  private authSvc = inject(AuthService);
 
+  // Feed mode
+  feedMode = signal<FeedMode>('friends');
+  
+  // Data
   posts = signal<Post[]>([]);
+  friendsFeedData = signal<Post[]>([]);
+  recommendedFeedData = signal<RecommendedPost[]>([]);
 
   newContent = '';
   newHashtags: string[] = [];
@@ -186,24 +334,47 @@ export class FriendsFeedComponent implements OnInit {
     this.load();
   }
 
+  switchMode(mode: FeedMode) {
+    this.feedMode.set(mode);
+    this.load();
+  }
+
   load() {
-    console.log('Loading friends feed posts...');
-    this.postsSvc.friends().subscribe({
-      next: (p) => {
-        console.log('Raw posts from API:', p);
+    const userId = this.authSvc.currentUserValue?.id;
+    if (!userId) {
+      console.error('No user logged in');
+      return;
+    }
 
-        const postsWithDefaults = p.map(post => ({
-          ...post,
-          likesCount: post.likesCount ?? post.likedByUsers?.length ?? 0,
-          liked: post.liked ?? false,
-          liking: false
-        }));
+    if (this.feedMode() === 'friends') {
+      this.loadFriendsFeed(userId.toString());
+    } else {
+      this.loadRecommendedFeed(userId.toString());
+    }
+  }
 
-        console.log('Processed posts:', postsWithDefaults);
-        this.posts.set(postsWithDefaults);
+  private loadFriendsFeed(userId: string) {
+    console.log('Loading friends feed for user:', userId);
+    this.postsSvc.getFriendsFeed(userId).subscribe({
+      next: (data) => {
+        console.log('Friends feed data:', data);
+        this.friendsFeedData.set(data);
       },
       error: (error) => {
         console.error('Error loading friends feed:', error);
+      }
+    });
+  }
+
+  private loadRecommendedFeed(userId: string) {
+    console.log('Loading recommended feed for user:', userId);
+    this.postsSvc.getRecommendedFeed(userId).subscribe({
+      next: (data) => {
+        console.log('Recommended feed data:', data);
+        this.recommendedFeedData.set(data);
+      },
+      error: (error) => {
+        console.error('Error loading recommended feed:', error);
       }
     });
   }
@@ -224,28 +395,27 @@ export class FriendsFeedComponent implements OnInit {
     });
   }
 
-  like(p: Post) {
-    const anyP = p as any;
-    if (anyP.liking) return;
-
-    anyP.liking = true;
-
-    this.postsSvc.like(p.id).subscribe({
+  like(postId: number) {
+    this.postsSvc.like(postId).subscribe({
       next: (res) => {
-        anyP.likesCount = res.count;
-        anyP.liked = res.liked;
-        anyP.liking = false;
+        console.log('Liked post:', res);
+        this.load(); // Reload to update like status
       },
-      error: () => {
-        anyP.liking = false;
+      error: (error) => {
+        console.error('Error liking post:', error);
       }
     });
   }
 
-  report(p: Post) {
-    this.postsSvc.report(p.id).subscribe({
+  report(postId: number) {
+    if (!confirm('Da li ste sigurni da želite da prijavite ovu objavu?')) {
+      return;
+    }
+
+    this.postsSvc.report(postId).subscribe({
       next: () => {
         alert('Objava je prijavljena');
+        this.load();
       },
       error: () => {
         alert('Greška pri prijavljivanju objave');
@@ -253,19 +423,30 @@ export class FriendsFeedComponent implements OnInit {
     });
   }
 
-  isLiked(p: Post): boolean {
-    return (p as any)?.liked ?? false;
+  getScoreClass(score: number): string {
+    if (score >= 70) return 'high-score';
+    if (score >= 40) return 'medium-score';
+    return 'low-score';
   }
 
-  likesCount(p: Post): number {
-    const anyP = p as any;
-    if (typeof anyP?.likesCount === 'number') return anyP.likesCount;
-    const arrLen = p.likedByUsers?.length;
-    return typeof arrLen === 'number' ? arrLen : 0;
+  getScoreBadgeClass(score: number): string {
+    if (score >= 70) return 'badge-high';
+    if (score >= 40) return 'badge-medium';
+    return 'badge-low';
   }
 
-  trackByPostId(index: number, post: Post): number {
-    return post.id;
+  getScoreLabel(score: number): string {
+    if (score >= 70) return 'Visoko preporučeno';
+    if (score >= 40) return 'Preporučeno';
+    return 'Možda vas zanima';
+  }
+
+  trackByPostId(index: number, item: Post): number {
+    return item.id;
+  }
+
+  trackByRecommendedId(index: number, item: RecommendedPost): number {
+    return item.post.id;
   }
 
   formatDate(dateValue: any): string {

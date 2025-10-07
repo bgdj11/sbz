@@ -9,7 +9,23 @@
       </org.drools.core.rule.TypeMetaInfo>
     </entry>
     <entry>
-      <string>demo.facts.FriendIds</string>
+      <string>rules.UseNew</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>FACT</role>
+        <isDeclaredType>true</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
+    <entry>
+      <string>demo.facts.UserAuthoredCount</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>FACT</role>
+        <isDeclaredType>false</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
+    <entry>
+      <string>demo.facts.SimilarUser</string>
       <org.drools.core.rule.TypeMetaInfo>
         <kind>CLASS</kind>
         <role>FACT</role>
@@ -18,30 +34,6 @@
     </entry>
     <entry>
       <string>demo.facts.UserFeedContext</string>
-      <org.drools.core.rule.TypeMetaInfo>
-        <kind>CLASS</kind>
-        <role>FACT</role>
-        <isDeclaredType>false</isDeclaredType>
-      </org.drools.core.rule.TypeMetaInfo>
-    </entry>
-    <entry>
-      <string>demo.facts.Item</string>
-      <org.drools.core.rule.TypeMetaInfo>
-        <kind>CLASS</kind>
-        <role>FACT</role>
-        <isDeclaredType>false</isDeclaredType>
-      </org.drools.core.rule.TypeMetaInfo>
-    </entry>
-    <entry>
-      <string>demo.facts.BlockedIds</string>
-      <org.drools.core.rule.TypeMetaInfo>
-        <kind>CLASS</kind>
-        <role>FACT</role>
-        <isDeclaredType>false</isDeclaredType>
-      </org.drools.core.rule.TypeMetaInfo>
-    </entry>
-    <entry>
-      <string>demo.facts.RecommendedFeedRequest</string>
       <org.drools.core.rule.TypeMetaInfo>
         <kind>CLASS</kind>
         <role>FACT</role>
@@ -72,6 +64,62 @@
         <isDeclaredType>false</isDeclaredType>
       </org.drools.core.rule.TypeMetaInfo>
     </entry>
+    <entry>
+      <string>demo.facts.UserLikedPosts</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>FACT</role>
+        <isDeclaredType>false</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
+    <entry>
+      <string>demo.facts.PostLikers</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>FACT</role>
+        <isDeclaredType>false</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
+    <entry>
+      <string>rules.UseBase</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>FACT</role>
+        <isDeclaredType>true</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
+    <entry>
+      <string>demo.facts.FriendIds</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>FACT</role>
+        <isDeclaredType>false</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
+    <entry>
+      <string>demo.facts.BlockedIds</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>FACT</role>
+        <isDeclaredType>false</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
+    <entry>
+      <string>demo.facts.Item</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>FACT</role>
+        <isDeclaredType>false</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
+    <entry>
+      <string>demo.facts.RecommendedFeedRequest</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>FACT</role>
+        <isDeclaredType>false</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
   </typeMetaInfos>
   <rulesByPackage>
     <entry>
@@ -84,16 +132,19 @@
     <entry>
       <string>rules</string>
       <set>
-        <string>BASE R3: authored hashtag</string>
-        <string>BASE R5: popular hashtag</string>
-        <string>FriendsFeed: select recent friends posts with details</string>
         <string>RecommendFeed: output candidates</string>
-        <string>RecommendFeed: userId missing</string>
         <string>REC guard: friend/self</string>
         <string>BASE R1: recent (&lt;24h)</string>
         <string>BASE R6: boost (popular &amp; liked hashtag)</string>
-        <string>RecommendFeed: user does not exist</string>
+        <string>REC Router -&gt; BASE (has friends OR has authored)</string>
+        <string>REC Router -&gt; NEW (no friends AND no authored)</string>
+        <string>NEW N1: liked by similar user</string>
         <string>BASE R2: liked hashtag</string>
+        <string>BASE R3: authored hashtag</string>
+        <string>BASE R5: popular hashtag</string>
+        <string>FriendsFeed: select recent friends posts with details</string>
+        <string>NEW N2: similar to liked post</string>
+        <string>RecommendFeed: userId missing</string>
         <string>BASE R4: popular post</string>
       </set>
     </entry>

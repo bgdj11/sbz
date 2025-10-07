@@ -1,4 +1,22 @@
-<h2>Objave prijatelja</h2>
+<h2>Feed</h2>
+
+<!-- Feed Mode Switcher -->
+<div class="feed-mode-switcher">
+  <button 
+    class="mode-btn"
+    [class.active]="feedMode() === 'friends'"
+    (click)="switchMode('friends')">
+    <i class="bi bi-people-fill"></i>
+    Prijatelji
+  </button>
+  <button 
+    class="mode-btn"
+    [class.active]="feedMode() === 'recommended'"
+    (click)="switchMode('recommended')">
+    <i class="bi bi-stars"></i>
+    Preporučeno
+  </button>
+</div>
 
 <div class="card create-post-card">
   <h3>Kreiraj novu objavu</h3>
@@ -28,42 +46,91 @@
   </div>
 </div>
 
-<div class="posts-container" *ngIf="posts().length > 0">
-  <div *ngFor="let p of posts(); trackBy: trackByPostId" class="card post-card">
+<!-- Friends Feed -->
+<div class="posts-container" *ngIf="feedMode() === 'friends' && friendsFeedData().length > 0">
+  <div *ngFor="let post of friendsFeedData(); trackBy: trackByPostId" class="card post-card">
     <article>
       <header class="post-author">
-        <b>{{p.author.firstName}} {{p.author.lastName}}</b>
+        <b>{{post.author.firstName}} {{post.author.lastName}}</b>
+        <small style="color: #6c757d; margin-left: 8px;">{{post.author.city}}</small>
       </header>
       
       <div class="post-content">
-        <p>{{p.content}}</p>
+        <p>{{post.content}}</p>
       </div>
       
-      <div class="post-meta" *ngIf="p.hashtags && p.hashtags.length > 0">
+      <div class="post-meta" *ngIf="post.hashtags && post.hashtags.length > 0">
         <div class="post-hashtags">
-          <span *ngFor="let tag of p.hashtags" class="hashtag">#{{tag}}</span>
+          <span *ngFor="let tag of post.hashtags" class="hashtag">#{{tag}}</span>
         </div>
       </div>
       
       <div class="post-footer">
-        <small class="post-date">{{formatDate(p.createdAt)}}</small>
+        <small class="post-date">{{formatDate(post.createdAt)}}</small>
         <div class="post-actions">
-          <button 
-            (click)="like(p)" 
-            [disabled]="p.liking"
-            [class.liked]="isLiked(p)"
-            class="btn btn-sm"
-          >
-            {{ isLiked(p) ? 'Unlike' : 'Like' }}
-          </button>
-          <span class="likes-count">👍 {{ likesCount(p) }}</span>
-          <button (click)="report(p)" class="btn btn-sm btn-warning">Prijavi</button>
+          <button (click)="like(post.id)" class="btn btn-sm">Like</button>
+          <span class="likes-count">👍 {{post.likesCount}}</span>
+          <button (click)="report(post.id)" class="btn btn-sm btn-warning">Prijavi</button>
         </div>
       </div>
     </article>
   </div>
 </div>
 
-<div *ngIf="posts().length === 0" class="no-posts">
+<!-- Recommended Feed -->
+<div class="posts-container" *ngIf="feedMode() === 'recommended' && recommendedFeedData().length > 0">
+  <div *ngFor="let rec of recommendedFeedData(); trackBy: trackByRecommendedId" class="card post-card">
+    <article>
+      <!-- Recommendation Score -->
+      <div class="post-score" [ngClass]="getScoreClass(rec.score)">
+        <div>
+          <div class="score-value">{{rec.score}}</div>
+          <div class="score-label">Score</div>
+        </div>
+        <span class="recommended-badge" [ngClass]="getScoreBadgeClass(rec.score)">
+          {{getScoreLabel(rec.score)}}
+        </span>
+      </div>
+
+      <!-- Recommendation Reasons -->
+      <div class="post-reasons" *ngIf="rec.reasons && rec.reasons.length > 0">
+        <h4>Zašto vam preporučujemo:</h4>
+        <ul class="reasons-list">
+          <li *ngFor="let reason of rec.reasons">{{reason}}</li>
+        </ul>
+      </div>
+
+      <header class="post-author">
+        <b>{{rec.post.author.firstName}} {{rec.post.author.lastName}}</b>
+        <small style="color: #6c757d; margin-left: 8px;">{{rec.post.author.city}}</small>
+      </header>
+      
+      <div class="post-content">
+        <p>{{rec.post.content}}</p>
+      </div>
+      
+      <div class="post-meta" *ngIf="rec.post.hashtags && rec.post.hashtags.length > 0">
+        <div class="post-hashtags">
+          <span *ngFor="let tag of rec.post.hashtags" class="hashtag">#{{tag}}</span>
+        </div>
+      </div>
+      
+      <div class="post-footer">
+        <small class="post-date">{{formatDate(rec.post.createdAt)}}</small>
+        <div class="post-actions">
+          <button (click)="like(rec.post.id)" class="btn btn-sm">Like</button>
+          <span class="likes-count">👍 {{rec.post.likesCount}}</span>
+          <button (click)="report(rec.post.id)" class="btn btn-sm btn-warning">Prijavi</button>
+        </div>
+      </div>
+    </article>
+  </div>
+</div>
+
+<div *ngIf="feedMode() === 'friends' && friendsFeedData().length === 0" class="no-posts">
   <p>Nema objava od prijatelja. Dodaj prijatelje da vidiš njihove objave!</p>
+</div>
+
+<div *ngIf="feedMode() === 'recommended' && recommendedFeedData().length === 0" class="no-posts">
+  <p>Nema preporučenih objava za vas u ovom trenutku.</p>
 </div>
