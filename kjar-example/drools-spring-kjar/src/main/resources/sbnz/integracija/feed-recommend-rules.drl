@@ -22,7 +22,7 @@ global java.util.List recommendFeedOut;
 dialect "java"
 
 declare UseBase end
-declare UseNew  end      
+declare UseNew  end
 
 rule "RecommendFeed: userId missing"
     salience 100

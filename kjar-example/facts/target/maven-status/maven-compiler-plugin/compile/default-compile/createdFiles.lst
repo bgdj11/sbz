@@ -1,9 +1,12 @@
 demo\facts\Item.class
+demo\facts\moderation\UserInfo.class
 demo\facts\PopularHashtag.class
 demo\facts\RecommendedFeedRequest.class
 demo\facts\UserLikedPosts.class
 demo\facts\BlockedIds.class
+demo\facts\moderation\ModerationFlag.class
 demo\facts\UserAuthoredCount.class
+demo\facts\moderation\BlockEvent.class
 demo\facts\PostLikers.class
 demo\facts\Item$Category.class
 demo\facts\UserFeedContext.class
@@ -11,5 +14,6 @@ demo\facts\CandidatePost.class
 demo\facts\FriendIds.class
 demo\facts\SimilarUser.class
 demo\facts\FriendFeedRequest.class
+demo\facts\moderation\ReportEvent.class
 demo\facts\PopularPost.class
 demo\facts\PostFact.class

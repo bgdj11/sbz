@@ -17,6 +17,14 @@
       </org.drools.core.rule.TypeMetaInfo>
     </entry>
     <entry>
+      <string>demo.facts.moderation.BlockEvent</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>EVENT</role>
+        <isDeclaredType>true</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
+    <entry>
       <string>demo.facts.UserAuthoredCount</string>
       <org.drools.core.rule.TypeMetaInfo>
         <kind>CLASS</kind>
@@ -38,6 +46,14 @@
         <kind>CLASS</kind>
         <role>FACT</role>
         <isDeclaredType>false</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
+    <entry>
+      <string>demo.facts.moderation.ReportEvent</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>EVENT</role>
+        <isDeclaredType>true</isDeclaredType>
       </org.drools.core.rule.TypeMetaInfo>
     </entry>
     <entry>
@@ -97,7 +113,7 @@
       </org.drools.core.rule.TypeMetaInfo>
     </entry>
     <entry>
-      <string>demo.facts.BlockedIds</string>
+      <string>demo.facts.moderation.UserInfo</string>
       <org.drools.core.rule.TypeMetaInfo>
         <kind>CLASS</kind>
         <role>FACT</role>
@@ -105,7 +121,7 @@
       </org.drools.core.rule.TypeMetaInfo>
     </entry>
     <entry>
-      <string>demo.facts.Item</string>
+      <string>demo.facts.BlockedIds</string>
       <org.drools.core.rule.TypeMetaInfo>
         <kind>CLASS</kind>
         <role>FACT</role>
@@ -120,13 +136,27 @@
         <isDeclaredType>false</isDeclaredType>
       </org.drools.core.rule.TypeMetaInfo>
     </entry>
+    <entry>
+      <string>demo.facts.Item</string>
+      <org.drools.core.rule.TypeMetaInfo>
+        <kind>CLASS</kind>
+        <role>FACT</role>
+        <isDeclaredType>false</isDeclaredType>
+      </org.drools.core.rule.TypeMetaInfo>
+    </entry>
   </typeMetaInfos>
   <rulesByPackage>
     <entry>
       <string>sbnz.integracija</string>
       <set>
+        <string>Detect Suspicious: More than 3 blocks in 6h - Block posting for 12h</string>
         <string>Classify Item - Low Range</string>
         <string>Classify Item - High Range</string>
+        <string>Detect Suspicious: More than 12 reports in 7 days - Block login for 72h</string>
+        <string>Detect Suspicious: More than 5 reports in 24h - Block posting for 24h</string>
+        <string>Detect Suspicious: More than 4 blocks in 24h - Block posting for 24h</string>
+        <string>Detect Suspicious: 2+ blocks in 48h AND 4+ reports in 24h - Block login for 48h</string>
+        <string>Detect Suspicious: More than 8 reports in 48h - Block posting for 48h</string>
       </set>
     </entry>
     <entry>

@@ -1,0 +1,177 @@
+package sbnz.integracija;
+
+import demo.facts.moderation.UserInfo;
+import demo.facts.moderation.ReportEvent;
+import demo.facts.moderation.BlockEvent;
+import demo.facts.moderation.ModerationFlag;
+
+import java.util.Date;
+import java.util.Calendar;
+
+global java.util.List moderationFlags;
+
+declare ReportEvent
+    @role( event )
+    @timestamp( ts )
+end
+
+declare BlockEvent
+    @role( event )
+    @timestamp( ts )
+end
+
+rule "Detektovan sumnjiv: vise od 5 reportova u 24 sata - blokiraj postovanje na 24h"
+    agenda-group "user-moderation"
+    salience 100
+when
+    $user : UserInfo( $uid : id )
+    $reportCount : Number( intValue > 5 ) from accumulate(
+        $report : ReportEvent( authorId == $uid ) over window:time(24h),
+        count($report)
+    )
+then
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.HOUR, 24);
+    Date suspendedUntil = cal.getTime();
+    
+    ModerationFlag flag = new ModerationFlag(
+        $uid, 
+        "Vise od 5 prijava u 24h - zabrana objavljivanja 24h (ukupno: " + $reportCount + ")",
+        suspendedUntil,
+        "POSTING"
+    );
+    moderationFlags.add(flag);
+    
+    System.out.println("PRAVILO AKTIVIRANO: Korisnik " + $uid + " ima " + $reportCount + " prijava u 24h");
+end
+
+rule "Detektovan sumnjiv: vise od 8 reportova u 48h - blokiraj postovanje na 48h"
+    agenda-group "user-moderation"
+    salience 90
+when
+    $user : UserInfo( $uid : id )
+    $reportCount : Number( intValue > 8 ) from accumulate(
+        $report : ReportEvent( authorId == $uid ) over window:time(48h),
+        count($report)
+    )
+then
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.HOUR, 48);
+    Date suspendedUntil = cal.getTime();
+    
+    ModerationFlag flag = new ModerationFlag(
+        $uid,
+        "Vise od 8 prijava u 48h - zabrana objavljivanja 48h (ukupno: " + $reportCount + ")",
+        suspendedUntil,
+        "POSTING"
+    );
+    moderationFlags.add(flag);
+    
+    System.out.println("PRAVILO AKTIVIRANO: Korisnik " + $uid + " ima " + $reportCount + " prijava u 48h");
+end
+
+rule "Detektovan sumnjiv: vise od 4 bloka u 24 sata - blokiraj postovanje na 24h"
+    agenda-group "user-moderation"
+    salience 100
+when
+    $user : UserInfo( $uid : id )
+    $blockCount : Number( intValue > 4 ) from accumulate(
+        $block : BlockEvent( targetId == $uid ) over window:time(24h),
+        count($block)
+    )
+then
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.HOUR, 24);
+    Date suspendedUntil = cal.getTime();
+    
+    ModerationFlag flag = new ModerationFlag(
+        $uid,
+        "Vise od 4 blokiranja u 24h - zabrana objavljivanja 24h (ukupno: " + $blockCount + ")",
+        suspendedUntil,
+        "POSTING"
+    );
+    moderationFlags.add(flag);
+    
+    System.out.println("PRAVILO AKTIVIRANO: Korisnik " + $uid + " je blokiran " + $blockCount + " puta u 24h");
+end
+
+rule "Detktovan sumnjiv: 2+ blokova u 48h i 4+ reportova u 24h - Blokiraj login na 48h"
+    agenda-group "user-moderation"
+    salience 110
+when
+    $user : UserInfo( $uid : id )
+    $blockCount : Number( intValue > 2 ) from accumulate(
+        $block : BlockEvent( targetId == $uid ) over window:time(48h),
+        count($block)
+    )
+    $reportCount : Number( intValue > 4 ) from accumulate(
+        $report : ReportEvent( authorId == $uid ) over window:time(24h),
+        count($report)
+    )
+then
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.HOUR, 48);
+    Date suspendedUntil = cal.getTime();
+    
+    ModerationFlag flag = new ModerationFlag(
+        $uid,
+        "Vise od 2 blokiranja u 48h I više od 4 prijave u 24h - zabrana logovanja 48h (blokiranja: "
+            + $blockCount + ", prijave: " + $reportCount + ")",
+        suspendedUntil,
+        "LOGIN"
+    );
+    moderationFlags.add(flag);
+    
+    System.out.println("PRAVILO AKTIVIRANO: Korisnik " + $uid + " ima " + $blockCount 
+        + " blokiranja u 48h i " + $reportCount + " prijava u 24h");
+end
+
+rule "Detektovan sumnjiv: vise od 3 blokiranja u 6 sati - blokiraj postovanje na 12 sati"
+    agenda-group "user-moderation"
+    salience 95
+when
+    $user : UserInfo( $uid : id )
+    $blockCount : Number( intValue > 3 ) from accumulate(
+        $block : BlockEvent( targetId == $uid ) over window:time(6h),
+        count($block)
+    )
+then
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.HOUR, 12);
+    Date suspendedUntil = cal.getTime();
+    
+    ModerationFlag flag = new ModerationFlag(
+        $uid,
+        "Vise od 3 blokiranja u 6h - brza eskalacija - zabrana objavljivanja 12h (ukupno: " + $blockCount + ")",
+        suspendedUntil,
+        "POSTING"
+    );
+    moderationFlags.add(flag);
+    
+    System.out.println("PRAVILO AKTIVIRANO: Korisnik " + $uid + " ima " + $blockCount + " blokiranja u 6h - brza eskalacija");
+end
+
+rule "Detektovan sumnjiv: vise od 12 prijava u 7 dana - blokiraj login na 72 sata"
+    agenda-group "user-moderation"
+    salience 105
+when
+    $user : UserInfo( $uid : id )
+    $reportCount : Number( intValue > 12 ) from accumulate(
+        $report : ReportEvent( authorId == $uid ) over window:time(7d),
+        count($report)
+    )
+then
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.HOUR, 72);
+    Date suspendedUntil = cal.getTime();
+    
+    ModerationFlag flag = new ModerationFlag(
+        $uid,
+        "Vise od 12 prijava u 7 dana - hronicno problematicno ponašanje - zabrana logovanja 72h (ukupno: " + $reportCount + ")",
+        suspendedUntil,
+        "LOGIN"
+    );
+    moderationFlags.add(flag);
+    
+    System.out.println("PRAVILO AKTIVIRANO: Korisnik " + $uid + " ima " + $reportCount + " prijava u 7 dana");
+end

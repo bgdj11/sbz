@@ -3,6 +3,10 @@ D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\facts\src\main\java\demo\facts\Candidate
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\facts\src\main\java\demo\facts\FriendFeedRequest.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\facts\src\main\java\demo\facts\FriendIds.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\facts\src\main\java\demo\facts\Item.java
+D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\facts\src\main\java\demo\facts\moderation\BlockEvent.java
+D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\facts\src\main\java\demo\facts\moderation\ModerationFlag.java
+D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\facts\src\main\java\demo\facts\moderation\ReportEvent.java
+D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\facts\src\main\java\demo\facts\moderation\UserInfo.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\facts\src\main\java\demo\facts\PopularHashtag.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\facts\src\main\java\demo\facts\PopularPost.java
 D:\FAKS_4\SBZ\PROJEKAT\sbz\kjar-example\facts\src\main\java\demo\facts\PostFact.java

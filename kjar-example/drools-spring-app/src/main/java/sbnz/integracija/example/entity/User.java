@@ -3,6 +3,7 @@ package sbnz.integracija.example.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -58,6 +59,12 @@ public class User {
     @JsonIgnoreProperties({"posts", "ratings", "friends", "blockedUsers", "password"})
     private Set<User> blockedUsers = new HashSet<>();
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date postingSuspendedUntil;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date loginSuspendedUntil;
+
     public User() {}
 
     public User(String firstName, String lastName, String email, String password, String city) {
@@ -100,6 +107,12 @@ public class User {
 
     public Set<User> getBlockedUsers() { return blockedUsers; }
     public void setBlockedUsers(Set<User> blockedUsers) { this.blockedUsers = blockedUsers; }
+
+    public Date getPostingSuspendedUntil() { return postingSuspendedUntil; }
+    public void setPostingSuspendedUntil(Date postingSuspendedUntil) { this.postingSuspendedUntil = postingSuspendedUntil; }
+
+    public Date getLoginSuspendedUntil() { return loginSuspendedUntil; }
+    public void setLoginSuspendedUntil(Date loginSuspendedUntil) { this.loginSuspendedUntil = loginSuspendedUntil; }
 
     public String getFullName() {
         return firstName + " " + lastName;

@@ -94,7 +94,6 @@ public class FeedService {
         return out;
     }
 
-    /** UserLikedPosts: koji je korisnik koje postove lajkovao */
     private UserLikedPosts buildUserLikedPostsFact(String userId, List<Post> posts) {
         Set<String> liked = posts.stream()
                 .filter(p -> {
@@ -107,7 +106,6 @@ public class FeedService {
         return new UserLikedPosts(userId, liked);
     }
 
-    /** SimilarUser: Pearson na 0/1 vektorima preko unije lajkovanih objava */
     private List<SimilarUser> computeSimilarUsers(String baseUserId, List<Post> posts) {
         Map<String, Set<String>> userLikes = new HashMap<>();
         for (Post p : posts) {
@@ -159,7 +157,6 @@ public class FeedService {
         return num / den;
     }
 
-    // friends feed (ne menja se)
     public List<PostFact> getFriendsFeed(String userId) {
         User current = userService.findById(Long.valueOf(userId)).orElse(null);
         List<String> friendIds = userService.getFriendIds(userId);
@@ -183,7 +180,6 @@ public class FeedService {
         }
     }
 
-    // recommend feed sa routerom
     public List<CandidatePost> getRecommendFeed(String userId) {
         User current = userService.findById(Long.valueOf(userId)).orElse(null);
         List<String> friendIds = userService.getFriendIds(userId);

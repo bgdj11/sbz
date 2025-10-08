@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kmodule xmlns="http://jboss.org/kie/6.0.0/kmodule" 
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-   
+
+    <kbase name="defaultKBase" packages="rules" default="true">
+        <ksession name="ksession-rules" type="stateful" default="true"/>
+    </kbase>
+
+    <kbase name="moderationKBase" packages="sbnz.integracija" eventProcessingMode="stream">
+        <ksession name="moderationKSession" type="stateful" clockType="pseudo"/>
+    </kbase>
+
 </kmodule>
