@@ -149,14 +149,14 @@
     <entry>
       <string>sbnz.integracija</string>
       <set>
-        <string>Detect Suspicious: More than 3 blocks in 6h - Block posting for 12h</string>
+        <string>Detektovan sumnjiv: vise od 12 prijava u 7 dana - blokiraj login na 72 sata</string>
         <string>Classify Item - Low Range</string>
         <string>Classify Item - High Range</string>
-        <string>Detect Suspicious: More than 12 reports in 7 days - Block login for 72h</string>
-        <string>Detect Suspicious: More than 5 reports in 24h - Block posting for 24h</string>
-        <string>Detect Suspicious: More than 4 blocks in 24h - Block posting for 24h</string>
-        <string>Detect Suspicious: 2+ blocks in 48h AND 4+ reports in 24h - Block login for 48h</string>
-        <string>Detect Suspicious: More than 8 reports in 48h - Block posting for 48h</string>
+        <string>Detektovan sumnjiv: vise od 4 bloka u 24 sata - blokiraj postovanje na 24h</string>
+        <string>Detektovan sumnjiv: vise od 3 blokiranja u 6 sati - blokiraj postovanje na 12 sati</string>
+        <string>Detektovan sumnjiv: vise od 5 reportova u 24 sata - blokiraj postovanje na 24h</string>
+        <string>Detektovan sumnjiv: vise od 8 reportova u 48h - blokiraj postovanje na 48h</string>
+        <string>Detktovan sumnjiv: 2+ blokova u 48h i 4+ reportova u 24h - Blokiraj login na 48h</string>
       </set>
     </entry>
     <entry>

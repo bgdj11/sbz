@@ -13,6 +13,7 @@ import sbnz.integracija.example.entity.User;
 import sbnz.integracija.example.service.PlaceService;
 import sbnz.integracija.example.service.PostService;
 import sbnz.integracija.example.service.UserService;
+import sbnz.integracija.example.service.ModerationService;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
@@ -28,6 +29,9 @@ public class MainController {
     private final PostService postService;
     private final UserService userService;
     private final PlaceService placeService;
+    
+    @Autowired
+    private ModerationService moderationService;
 
     @Autowired
     public MainController(PostService postService, UserService userService, PlaceService placeService) {
@@ -75,6 +79,15 @@ public class MainController {
         User currentUser = getCurrentUser(session);
         if (currentUser == null) {
             return ResponseEntity.status(401).body("User not authenticated");
+        }
+
+        if (moderationService.isPostingSuspended(currentUser.getId())) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Privremeno vam je zabranjeno kreiranje postova");
+            errorResponse.put("reason", "Detektovano je neprikladno ponašanje");
+            errorResponse.put("suspendedUntil", currentUser.getPostingSuspendedUntil().getTime());
+            
+            return ResponseEntity.status(403).body(errorResponse);
         }
 
         String content = (String) request.get("content");

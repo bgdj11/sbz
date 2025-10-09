@@ -1,0 +1,114 @@
+<div class="suspicious-users-container">
+  <div class="header">
+    <h1>Detekcija sumljivih korisnika</h1>
+    <p class="description">
+      Sistem automatski detektuje korisnike sa problematičnim ponašanjem na osnovu prijava i blokiranja.
+    </p>
+  </div>
+
+  <div class="action-bar">
+    <button 
+      class="btn btn-primary detect-btn" 
+      (click)="detectSuspiciousUsers()"
+      [disabled]="isLoading"
+      *ngIf="isAdmin">
+      <span *ngIf="!isLoading">🔍 Pokreni detekciju</span>
+      <span *ngIf="isLoading">⏳ Analiza u toku...</span>
+    </button>
+
+    <div class="detection-info" *ngIf="detectedAt">
+      <span class="info-label">Poslednja detekcija:</span>
+      <span class="info-value">{{ formatDate(detectedAt) }}</span>
+    </div>
+  </div>
+
+  <div class="error-message" *ngIf="error">
+    <span class="error-icon">⚠️</span>
+    <span>{{ error }}</span>
+  </div>
+
+  <div class="results-summary" *ngIf="suspiciousUsers.length > 0">
+    <div class="summary-card">
+      <div class="summary-icon">🚨</div>
+      <div class="summary-content">
+        <div class="summary-number">{{ suspiciousUsers.length }}</div>
+        <div class="summary-label">Sumljivih korisnika</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="users-list" *ngIf="suspiciousUsers.length > 0">
+    <div 
+      class="user-card"
+      *ngFor="let user of suspiciousUsers"
+      [ngClass]="getSeverityClass(user.reportCount, user.blockCount)">
+      
+      <div class="user-header">
+        <div class="user-info">
+          <h3 class="user-name">{{ user.firstName }} {{ user.lastName }}</h3>
+          <p class="user-email">{{ user.email }}</p>
+        </div>
+        
+        <div class="suspension-badge" [ngClass]="getSuspensionTypeBadgeClass(user.suspensionType)">
+          {{ getSuspensionTypeText(user.suspensionType) }}
+        </div>
+      </div>
+
+      <div class="user-stats">
+        <div class="stat-item">
+          <span class="stat-icon">📢</span>
+          <span class="stat-value">{{ user.reportCount }}</span>
+          <span class="stat-label">Prijava</span>
+        </div>
+        
+        <div class="stat-item">
+          <span class="stat-icon">🚫</span>
+          <span class="stat-value">{{ user.blockCount }}</span>
+          <span class="stat-label">Blokiranja</span>
+        </div>
+
+        <div class="stat-item">
+          <span class="stat-icon">⏰</span>
+          <span class="stat-value">{{ getTimeRemaining(user.suspendedUntil) }}</span>
+          <span class="stat-label">Preostalo</span>
+        </div>
+      </div>
+
+      <div class="reason-section">
+        <h4>Razlog detekcije:</h4>
+        <p class="reason-text">{{ user.reason }}</p>
+      </div>
+
+      <div class="punishment-section">
+        <h4>Preporučena kazna:</h4>
+        <div class="punishment-details">
+          <p><strong>Tip:</strong> {{ getSuspensionTypeText(user.suspensionType) }}</p>
+          <p><strong>Trajanje do:</strong> {{ formatDate(user.suspendedUntil) }}</p>
+          <p><strong>Detektovano:</strong> {{ formatDate(user.flaggedAt) }}</p>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button 
+          class="btn btn-action btn-apply"
+          (click)="applySuspension(user)">
+          ✓ Primeni kaznu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-results" *ngIf="!isLoading && suspiciousUsers.length === 0 && detectedAt">
+    <div class="no-results-icon">✅</div>
+    <h3>Nema sumljivih korisnika</h3>
+    <p>Trenutno nema korisnika koji ispunjavaju kriterijume za detekciju.</p>
+  </div>
+
+  <!-- DEBUG: isLoading = {{ isLoading }}, suspiciousUsers.length = {{ suspiciousUsers.length }} -->
+  
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Analiziram korisnike...</p>
+    <p style="font-size: 12px; color: #666;">DEBUG: isLoading = {{ isLoading }}</p>
+  </div>
+</div>

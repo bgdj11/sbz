@@ -25,6 +25,14 @@
 	border-radius: 6px;
 }
 .topnav a:hover { background: #f2f5f9; }
+.topnav a.admin-link {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	font-weight: 600;
+}
+.topnav a.admin-link:hover {
+	background: linear-gradient(135deg, #5568d3 0%, #663a8e 100%);
+}
 .topnav .spacer { flex: 1 1 auto; }
 
 .container {

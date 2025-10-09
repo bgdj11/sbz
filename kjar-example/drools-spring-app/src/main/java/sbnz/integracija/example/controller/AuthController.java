@@ -7,6 +7,7 @@ import sbnz.integracija.example.dto.DTOMapper;
 import sbnz.integracija.example.dto.UserDTO;
 import sbnz.integracija.example.entity.User;
 import sbnz.integracija.example.service.UserService;
+import sbnz.integracija.example.service.ModerationService;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
@@ -19,6 +20,9 @@ import java.util.Optional;
 public class AuthController {
 
     private final UserService userService;
+    
+    @Autowired
+    private ModerationService moderationService;
 
     @Autowired
     public AuthController(UserService userService) {
@@ -45,6 +49,16 @@ public class AuthController {
         
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+
+            if (moderationService.isLoginSuspended(user.getId())) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Vas nalog je privremeno suspendovan");
+                errorResponse.put("reason", "Detektovano je neprikladno ponasanje");
+                errorResponse.put("suspendedUntil", user.getLoginSuspendedUntil().getTime());
+                
+                return ResponseEntity.status(403).body(errorResponse);
+            }
+            
             session.setAttribute("currentUser", user);
             
             Map<String, Object> response = new HashMap<>();

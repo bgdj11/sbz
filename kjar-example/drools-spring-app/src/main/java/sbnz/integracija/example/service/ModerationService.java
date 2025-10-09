@@ -30,30 +30,9 @@ public class ModerationService {
     }
 
     public List<ModerationFlag> detectSuspiciousBehavior(Long userId, List<ReportEvent> reportEvents, List<BlockEvent> blockEvents) {
-        KieSession kieSession = kieContainer.newKieSession("moderationKSession");
-        
-        try {
-            List<ModerationFlag> flags = new ArrayList<>();
-            kieSession.setGlobal("moderationFlags", flags);
-
-            UserInfo userInfo = new UserInfo(userId);
-            kieSession.insert(userInfo);
-
-            for (ReportEvent event : reportEvents) {
-                kieSession.insert(event);
-            }
-            
-            for (BlockEvent event : blockEvents) {
-                kieSession.insert(event);
-            }
-
-            kieSession.getAgenda().getAgendaGroup("user-moderation").setFocus();
-            kieSession.fireAllRules();
-
-            return flags;
-        } finally {
-            kieSession.dispose();
-        }
+        // Koristi pseudo clock sesiju (temporal operatori zahtevaju STREAM mode)
+        // Pozivamo metodu sa trenutnim vremenom
+        return detectSuspiciousBehaviorWithClock(userId, reportEvents, blockEvents, new Date());
     }
 
     public List<ModerationFlag> detectSuspiciousBehaviorWithClock(Long userId, 

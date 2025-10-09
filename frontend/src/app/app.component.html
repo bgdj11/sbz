@@ -5,6 +5,7 @@
   <a routerLink="/places" *ngIf="auth.isLoggedIn">Mesta</a>
   <a routerLink="/places/new" *ngIf="auth.isAdmin">+ Mesto</a>
   <a routerLink="/users/search" *ngIf="auth.isLoggedIn">Pronađi prijatelje</a>
+  <a routerLink="/users/suspicious" *ngIf="auth.isAdmin" class="admin-link">🚨 Detekcija</a>
   <span class="spacer"></span>
   <ng-container *ngIf="!auth.isLoggedIn">
     <a routerLink="/login">Login</a>

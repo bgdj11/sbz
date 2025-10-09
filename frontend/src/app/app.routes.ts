@@ -25,5 +25,8 @@ export const routes: Routes = [
   { path: 'users/search', canActivate: [authGuard],
     loadComponent: () => import('./features/users/users-search/users-search.component').then(m => m.UsersSearchComponent) },
 
+  { path: 'users/suspicious', canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./features/users/suspicious-users/suspicious-users.component').then(m => m.SuspiciousUsersComponent) },
+
   { path: '**', redirectTo: 'posts/friends' }
 ];
