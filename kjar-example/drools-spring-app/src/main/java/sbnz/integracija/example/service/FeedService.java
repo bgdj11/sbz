@@ -75,12 +75,16 @@ public class FeedService {
         LocalDateTime since = LocalDateTime.now().minusHours(24);
         return posts.stream()
                 .filter(p -> p.getCreatedAt() != null && p.getCreatedAt().isAfter(since))
-                .filter(p -> Optional.ofNullable(p.getLikesCount()).orElse(0) > 10)
+                .filter(p -> {
+                    int actualLikes = Optional.ofNullable(p.getLikedByUsers())
+                            .map(Set::size)
+                            .orElse(0);
+                    return actualLikes > 10;
+                })
                 .map(p -> new PopularPost(String.valueOf(p.getId())))
                 .collect(Collectors.toList());
     }
 
-    /** PostLikers: postId -> skup userId koji su lajkovali */
     private List<PostLikers> buildPostLikersFacts(List<Post> posts) {
         List<PostLikers> out = new ArrayList<>();
         for (Post p : posts) {
@@ -107,6 +111,10 @@ public class FeedService {
     }
 
     private List<SimilarUser> computeSimilarUsers(String baseUserId, List<Post> posts) {
+        Set<String> universe = posts.stream()
+                .map(p -> String.valueOf(p.getId()))
+                .collect(Collectors.toSet());
+        
         Map<String, Set<String>> userLikes = new HashMap<>();
         for (Post p : posts) {
             String pid = String.valueOf(p.getId());
@@ -117,15 +125,51 @@ public class FeedService {
                 userLikes.computeIfAbsent(uid, k -> new HashSet<>()).add(pid);
             }
         }
+        
         Set<String> base = userLikes.getOrDefault(baseUserId, Collections.emptySet());
+        
         List<SimilarUser> out = new ArrayList<>();
+        
         for (Map.Entry<String, Set<String>> e : userLikes.entrySet()) {
             String otherId = e.getKey();
             if (otherId.equals(baseUserId)) continue;
-            double score = pearson01(base, e.getValue());
+            
+            // Use universe-based Pearson calculation
+            double score = pearson01Universe(base, e.getValue(), universe);
+            
             out.add(new SimilarUser(baseUserId, otherId, score));
         }
+        
         return out;
+    }
+
+    private double pearson01Universe(Set<String> a, Set<String> b, Set<String> universe) {
+        if (universe.isEmpty()) return 0.0;
+
+        int n = universe.size();
+        int sumA = 0, sumB = 0;
+        for (String id : universe) {
+            sumA += a.contains(id) ? 1 : 0;
+            sumB += b.contains(id) ? 1 : 0;
+        }
+        double meanA = sumA / (double) n;
+        double meanB = sumB / (double) n;
+
+        double num = 0, denA = 0, denB = 0;
+        for (String id : universe) {
+            double ai = a.contains(id) ? 1.0 : 0.0;
+            double bi = b.contains(id) ? 1.0 : 0.0;
+            double da = ai - meanA;
+            double db = bi - meanB;
+            num += da * db;
+            denA += da * da;
+            denB += db * db;
+        }
+        double den = Math.sqrt(denA) * Math.sqrt(denB);
+        
+        if (den == 0.0) return 0.0;
+        
+        return num / den;
     }
 
     private double pearson01(Set<String> a, Set<String> b) {
@@ -153,12 +197,13 @@ public class FeedService {
             denB += db * db;
         }
         double den = Math.sqrt(denA) * Math.sqrt(denB);
+        
         if (den == 0.0) return 0.0;
+        
         return num / den;
     }
 
     public List<PostFact> getFriendsFeed(String userId) {
-        User current = userService.findById(Long.valueOf(userId)).orElse(null);
         List<String> friendIds = userService.getFriendIds(userId);
         List<String> blockedIds = userService.getBlockedIds(userId);
         List<Post> allPosts = postService.getAllPosts();
@@ -185,15 +230,15 @@ public class FeedService {
         List<String> friendIds = userService.getFriendIds(userId);
         List<Post> allPosts = postService.getAllPosts();
 
-        Set<String> likedTags    = getUserLikedHashtags(current);
+        Set<String> likedTags = getUserLikedHashtags(current);
         Set<String> authoredTags = getUserAuthoredHashtags(current);
-        int authoredCount        = getUserAuthoredCount(current);
+        int authoredCount = getUserAuthoredCount(current);
         List<PopularHashtag> popularTags  = computePopularHashtags(allPosts);
-        List<PopularPost>    popularPosts = computePopularPosts(allPosts);
+        List<PopularPost> popularPosts = computePopularPosts(allPosts);
 
-        List<PostLikers>   postLikersFacts    = buildPostLikersFacts(allPosts);
-        UserLikedPosts     userLikedPostsFact = buildUserLikedPostsFact(userId, allPosts);
-        List<SimilarUser>  similarUserFacts   = computeSimilarUsers(userId, allPosts);
+        List<PostLikers> postLikersFacts = buildPostLikersFacts(allPosts);
+        UserLikedPosts userLikedPostsFact = buildUserLikedPostsFact(userId, allPosts);
+        List<SimilarUser> similarUserFacts  = computeSimilarUsers(userId, allPosts);
 
         KieSession session = kieContainer.newKieSession();
         try {

@@ -97,10 +97,12 @@ when
     $req : RecommendedFeedRequest( $uid : userId )
     $c   : CandidatePost( $p : post )
     $plC : PostLikers( postId == $p.id,   $likersC : userIds )
-    $plL : PostLikers(                    $likersL : userIds )
     UserLikedPosts( userId == $uid, $liked : postIds )
-    eval( $liked != null && $liked.contains($plL.getPostId()) )
-    eval( overlap($likersC, $likersL) >= 0.7 )
+    exists(
+        $plL : PostLikers( $likersL : userIds )
+        and eval( $liked != null && $liked.contains($plL.getPostId()) )
+        and eval( overlap($likersC, $likersL) >= 0.7 )
+    )
 then
     $c.addScore(1, "slicno lajkovanim objavama");
 end

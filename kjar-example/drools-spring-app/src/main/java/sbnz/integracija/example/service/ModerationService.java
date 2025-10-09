@@ -30,8 +30,6 @@ public class ModerationService {
     }
 
     public List<ModerationFlag> detectSuspiciousBehavior(Long userId, List<ReportEvent> reportEvents, List<BlockEvent> blockEvents) {
-        // Koristi pseudo clock sesiju (temporal operatori zahtevaju STREAM mode)
-        // Pozivamo metodu sa trenutnim vremenom
         return detectSuspiciousBehaviorWithClock(userId, reportEvents, blockEvents, new Date());
     }
 
